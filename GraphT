@@ -1,0 +1,105 @@
+import java.util.*;
+
+class Edge implements Comparable<Edge> {
+    int src, dest, weight;
+
+    public Edge(int src, int dest, int weight) {
+        this.src = src;
+        this.dest = dest;
+        this.weight = weight;
+    }/*Enter the number of vertices: 5
+Enter the number of edges: 6
+Enter edges in format: source destination weight
+0 1 10
+1 2 20
+0 3 30
+3 4 40
+2 4 50
+3 2 60*/
+    public int compareTo(Edge other) {
+        return this.weight - other.weight;
+    }
+}
+
+class DisjointSet {
+    int[] parent, rank;
+
+    public DisjointSet(int n) {
+        parent = new int[n];
+        rank = new int[n];
+        for (int i = 0; i < n; i++) {
+            parent[i] = i;
+            rank[i] = 0;
+        }
+    }
+
+    public int find(int u) {
+       if (parent[u]!= u) {
+           parent[u] = find(parent[u]);
+       }
+        return parent[u];
+    }
+
+    public void union(int u, int v) {
+        int pu = find(u);
+        int pv = find(v);
+        if (pu == pv) return;
+        if (rank[pu] < rank[pv]) {
+            parent[pu] = pv;
+        } else if (rank[pu] > rank[pv]) {
+            parent[pv] = pu;
+        } else {
+            parent[pv] = pu;
+            rank[pu]++;
+        }
+    }
+}
+
+public class KruskalAlgorithm {
+    public static List<Edge> kruskal(List<Edge> edges, int n) {
+        Collections.sort(edges);
+        DisjointSet ds = new DisjointSet(n);
+        List<Edge> mst = new ArrayList<>();
+        for (Edge edge : edges) {
+            int srcParent = ds.find(edge.src);
+            int destParent = ds.find(edge.dest);
+            if (srcParent!= destParent) {
+                mst.add(edge);
+                ds.union(srcParent, destParent);
+            }
+        }
+        return mst;
+    }
+
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+
+        System.out.print("Enter the number of vertices: ");
+        int n = scanner.nextInt();
+
+        System.out.print("Enter the number of edges: ");
+        int m = scanner.nextInt();
+
+        List<Edge> edges = new ArrayList<>();
+        System.out.println("Enter edges in format: source destination weight");
+        for (int i = 0; i < m; i++) {
+            int src = scanner.nextInt();
+            int dest = scanner.nextInt();
+            int weight = scanner.nextInt();
+            if (src >= n || dest >= n) {
+                System.out.println("Invalid vertex index. Please re-enter the edge.");
+                i--;
+            } else {
+                edges.add(new Edge(src, dest, weight));
+            }
+        }
+
+        List<Edge> mst = kruskal(edges, n);
+        System.out.println("Minimum Spanning Tree:");
+        for (Edge edge : mst) {
+            System.out.println(edge.src + " - " + edge.dest + ", Weight: " + edge.weight);
+        }
+
+        scanner.close();
+    }
+}
